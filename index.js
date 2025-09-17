@@ -1,32 +1,52 @@
 import express from "express";
-import users from "./MOCK_DATA.json" with { type: "json" };;
-// what if the server is hybird app.get('/users',(req,res)=>{
-//   const html =`
-//   <ul>
-//   ${users.map((users)=><li>FirstName :{users.first_name} </li>).join("")}
-//   </ul>
-//   `
-//   return res.send(html)
-// })
+import users from "./MOCK_DATA.json" with { type: "json" };
+import { routes } from "./Routes.js";
+import fs from 'fs';
+import { error } from "console";
+
+
 
 const PORT = 8000;
 
+
 const app = express();
-app.get("/api/users", (req, res) => {
+// middleware
+app.use(express.json({extended :false}));
+// app.use((req,res,next)=>{
+//   console.log("success");
+//   req.myUserName = "Mohsin Bashir"
+//   next();
+  
+// })
+// app.use((req,res,next)=>{
+//   console.log("My Name :",req.myUserName);
+//   return res.end("ended")
+// })
+
+app.route(routes.users).get( (req, res) => {
   return res.json(users);
   
-});
-// to get a particular user 
-// : for dynamic paraneters 
-//.json for thw responce in json 
+}).post((req,res)=>{
+  const body =req.body;
+  users.push({...body,id : users.length + 1});
+  fs.writeFile('./MOCK_DATA.json',JSON.stringify(users),(error,data)=>{
+    res.json({status : 'succes' , id : users.length ,body : body }) 
+  })
+  console.log(body);
+})
 
-app.get('/api/users/:id',(req,res)=>{
+app.route(routes.id).get((req,res)=>{
   const id = Number(req.params.id);
   const user = users.find(user=>user.id===id);
   return res.json(user)
-  
+}).patch((req,res)=>{
+  //TODO :  edit user data with id 
+  res.json({status : 'pending'}) 
+}).delete((req,res)=>{
+  //TODO :  delete user data with id 
+  res.json({status : 'pending'}) 
 });
-app.get('/api/users/name/:first_name',(req,res)=>{
+app.get(routes.username,(req,res)=>{
   const first_name = req.params.first_name;
   const user = users.find(user=>user.first_name === first_name);
    if (!user) {
@@ -34,21 +54,11 @@ app.get('/api/users/name/:first_name',(req,res)=>{
   }
   return res.json(user);
 });
-app.post('/api/users',(req,res)=>{
+app.post(routes.users,(req,res)=>{
   //TODO : create user 
   res.json({status : 'pending'}) 
-
 });
-app.patch('/api/users/:id',(req,res)=>{
-  //TODO :  edit user data with id 
-  res.json({status : 'pending'}) 
-
-});
-app.delete('/api/users/:id',(req,res)=>{
-  //TODO :  delete user data with id 
-  res.json({status : 'pending'}) 
-
-});
+app
 app.listen(PORT, () => {
   console.log("started",);
 });
