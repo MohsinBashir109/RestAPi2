@@ -3,17 +3,11 @@ import users from "./MOCK_DATA.json" with { type: "json" };
 import { routes } from "./Routes.js";
 import fs from 'fs';
 import { error } from "console";
-
-
-
 const PORT = 8000;
-
-
 const app = express();
 // middleware
 app.use(express.json());
 app.use(express.urlencoded({extended : true}));
-
 // app.use((req,res,next)=>{
 //   console.log("success");
 //   req.myUserName = "Mohsin Bashir"
@@ -40,6 +34,7 @@ app.route(routes.users).get( (req, res) => {
 app.route(routes.id).get((req,res)=>{
   const id = Number(req.params.id);
   const user = users.find(user=>user.id===id);
+   console.log(req.headers );
   return res.json(user)
 }).patch((req,res)=>{
   //TODO :  edit user data with id 
@@ -62,7 +57,7 @@ app.post(routes.users,(req,res)=>{
 });
 app
 app.listen(PORT, () => {
-  console.log("started",);
+  console.log("started", );
 });
 
 
