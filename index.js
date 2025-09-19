@@ -1,4 +1,4 @@
-import { UserModel } from "./models/user.js";
+import { User } from "./models/user.js";
 import { connected } from "./config/db.js";
 import express from "express";
 import fs from "fs";
@@ -14,7 +14,7 @@ connected();
 app
   .route(routes.users)
   .get(async (req, res) => {
-    const user = await UserModel.find({});
+    const user = await User.find();
     return res.status(200).json({ msg: "success", user: user });
   })
   .post(async (req, res) => {
@@ -30,13 +30,13 @@ app
       return res.status(400).json({ msg: "all field are require" });
     }
 
-    const userExist = await UserModel.findOne({ email: req.body.email });
+    const userExist = await User.findOne({ email: req.body.email });
     if (userExist) {
       res.status(409).json({ msg: "User with this email already exists" });
       //  console.log(userExist);
     }
 
-    const result = await UserModel.create({
+    const result = await User.create({
       firstName: body?.first_name,
       lastName: body?.last_name,
       email: body?.email,
@@ -49,19 +49,28 @@ app
 
 app
   .route(routes.id)
-  .get((req, res) => {
-    const id = Number(req.params.id);
-    const user = users.find((user) => user.id === id);
-    console.log(req.headers);
-    return res.json(user);
+  .get(async (req, res) => {
+    const user = await User.findById(req.params.id);
+    console.log(user);
+    if (!user) {
+      return res.status(404).json({ msg: "user Doesnot Exits" });
+    }
+
+    return res.status(200).json({ msg: " success", user: user });
   })
-  .patch((req, res) => {
-    //TODO :  edit user data with id
-    res.json({ status: "pending" });
+  .patch(async (req, res) => {
+    const user = await User.findByIdAndUpdate(req.params.id, {
+      firstName: "hamza",
+    });
+    if (!user) {
+      return res.status(404).json({ msg: "user Doesnot Exits" });
+    }
+
+    return res.status(200).json({ msg: " success", user: user });
   })
-  .delete((req, res) => {
-    //TODO :  delete user data with id
-    res.json({ status: "pending" });
+  .delete(async (req, res) => {
+    const user = await User.findByIdAndDelete(req.params.id);
+    res.json({ status: "success" });
   });
 app.get(routes.username, (req, res) => {
   const first_name = req.params.first_name;
